@@ -1,0 +1,10 @@
+.idea
+
+# Jest directories
+coverage
+
+# log files
+yarn-error.log
+test-report.xml
+.build
+node_modules

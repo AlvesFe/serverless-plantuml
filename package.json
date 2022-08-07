@@ -1,0 +1,17 @@
+{
+  "name": "serverless-plantuml",
+  "version": "1.0.0",
+  "description": "Serverless plugin to pregen a PlantUML diagram from the serverless resources",
+  "main": "./src/index.js",
+  "author": "Felipe Batista Alves <AlvesFe>",
+  "license": "MIT",
+  "private": true,
+  "peerDependencies": {
+    "serverless": ">=2.66"
+  },
+  "devDependencies": {
+    "eslint": "^8.2.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.25.2"
+  }
+}
