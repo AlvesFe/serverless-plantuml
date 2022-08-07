@@ -17,7 +17,7 @@ class PlantUml {
     const serviceName = this.serverless.service.service
     const stage = this.serverless.service.provider.stage
     const options = {
-      path: custom?.plantUml?.path || '',
+      path: custom.plantUml.path.replace(/^\/|\/$/g, ''),
       name: custom?.plantUml?.name || serviceName
     }
 
