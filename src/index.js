@@ -50,13 +50,12 @@ class PlantUml {
     const { header, footer, imports, autoGenStart, autoGenEnd, editHere } = template
     const start = `${header} ${diagramName}\n\n${imports.join('\n')}\n`
     const end = `\n${footer}\n`
+    const center = [autoGenEnd, manualBody || editHere, autoGenStart].join('')
     const diagram = [
       autoGenStart,
       start,
       autoGenBody,
-      autoGenEnd,
-      manualBody || editHere,
-      autoGenStart,
+      center,
       end,
       autoGenEnd
     ].join('\n')
