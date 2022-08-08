@@ -4,9 +4,6 @@ const logger = require('./utils/logger')
 const template = require('./templates/template.json')
 const IS_DEBUG = process.env.SLS_DEBUG ? true : false
 
-const credentials = new AWS.SharedIniFileCredentials({ profile: 'felipe' })
-AWS.config.credentials = credentials
-
 class PlantUml {
   constructor(serverless) {
     this.serverless = serverless
