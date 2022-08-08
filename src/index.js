@@ -1,24 +1,30 @@
+const AWS = require('aws-sdk')
 const fs = require('fs')
 const logger = require('./utils/logger')
 const template = require('./templates/template.json')
 const IS_DEBUG = process.env.SLS_DEBUG ? true : false
 
+const credentials = new AWS.SharedIniFileCredentials({ profile: 'felipe' })
+AWS.config.credentials = credentials
+
 class PlantUml {
   constructor(serverless) {
     this.serverless = serverless
     this.hooks = {
-      initialize: () => this.initialize()
+      initialize: async () => await this.initialize()
     }
   }
 
-  initialize() {
+  async initialize() {
     logger('Generating diagram...')
     const { functions, custom, resources } = this.serverless.configurationInput
     const serviceName = this.serverless.service.service
     const stage = this.serverless.service.provider.stage
     const options = {
-      path: custom.plantUml.path.replace(/^\/|\/$/g, ''),
-      name: custom?.plantUml?.name || serviceName
+      path: custom?.plantUml?.path.replace(/^\/|\/$/g, '') || '',
+      name: custom?.plantUml?.name || serviceName,
+      s3Bucket: custom?.plantUml?.s3Bucket,
+      s3Path: custom?.plantUml?.s3Path?.replace(/^\/|\/$/g, '') || ''
     }
 
     const items = this.generateResources({
@@ -29,6 +35,7 @@ class PlantUml {
     }, options)
     const diagram = this.createDiagram(items, options)
     this.saveDiagram(diagram, options)
+    options.s3Bucket && await this.putS3(diagram, options)
   }
 
   createDiagram(items, options) {
@@ -117,6 +124,24 @@ class PlantUml {
       if (err) return logger('Could not save diagram: ' + err, 'error')
       logger(`Diagram created at ${path}/diagram.puml`)
     })
+  }
+
+  async putS3(diagram, options) {
+    const { name, s3Bucket, s3Path } = options
+    const s3 = new AWS.S3()
+    const params = {
+      Bucket: s3Bucket,
+      Key: s3Path ? `${s3Path}/${name}.puml` : `${name}.puml`,
+      Body: diagram,
+      ACL: 'public-read'
+    }
+
+    try {
+      await s3.putObject(params).promise()
+      logger(`Diagram uploaded to s3://${params.Bucket}/${params.Key}`)
+    } catch (error) {
+      logger(`Could not upload diagram: ${error}`, 'error')
+    }
   }
 }
 
