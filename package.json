@@ -6,6 +6,9 @@
   "author": "Felipe Batista Alves <AlvesFe>",
   "license": "MIT",
   "private": false,
+  "scripts": {
+    "publish": "npm publish"
+  },
   "peerDependencies": {
     "serverless": ">=2.66"
   },
