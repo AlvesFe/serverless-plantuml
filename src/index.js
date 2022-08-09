@@ -34,7 +34,7 @@ class PlantUml {
     }, options)
     const diagram = this.createDiagram(items, options)
     this.saveDiagram(diagram, options)
-    (deployToS3 && options.s3Bucket) && await this.putS3(diagram, options)
+    if (deployToS3 && options.s3Bucket) await this.putS3(diagram, options)
   }
 
   createDiagram(items, options) {
