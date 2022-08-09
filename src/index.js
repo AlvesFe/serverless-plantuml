@@ -10,11 +10,11 @@ class PlantUml {
     this.serverless = serverless
     this.hooks = {
       'before:offline:start': async () => await this.initialize(),
-      'before:deploy:deploy': async () => await this.initialize()
+      'before:deploy:deploy': async () => await this.initialize(true)
     }
   }
 
-  async initialize() {
+  async initialize(deployToS3 = false) {
     logger('Generating diagram...')
     const { functions, custom, resources } = this.serverless.configurationInput
     const serviceName = this.serverless.service.service
@@ -34,7 +34,7 @@ class PlantUml {
     }, options)
     const diagram = this.createDiagram(items, options)
     this.saveDiagram(diagram, options)
-    options.s3Bucket && await this.putS3(diagram, options)
+    (deployToS3 && options.s3Bucket) && await this.putS3(diagram, options)
   }
 
   createDiagram(items, options) {
@@ -133,7 +133,7 @@ class PlantUml {
       case 'http':
         return `Rel(${stage}${pascalCaseName}, ${lambda}, "${event.http.method.toUpperCase()} ${event.http.path}", "HTTP")`
       case 'sqs':
-        const queueName = typeof event.sqs === 'string' ? 
+        const queueName = typeof event.sqs === 'string' ?
           caseConverter(event.sqs.split(':').pop(), 'kebab', 'camel') :
           `${event.sqs.arn['Fn::GetAtt'][0]}${pascalStage}`
         return `Rel(${queueName}, ${lambda}, "Subscriber", "SQS")`
