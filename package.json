@@ -5,7 +5,7 @@
   "main": "./src/index.js",
   "author": "Felipe Batista Alves <AlvesFe>",
   "license": "MIT",
-  "private": true,
+  "private": false,
   "peerDependencies": {
     "serverless": ">=2.66"
   },
