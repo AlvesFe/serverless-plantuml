@@ -190,8 +190,7 @@ class PlantUml {
     const params = {
       Bucket: s3Bucket,
       Key: s3Path ? `${s3Path}/${name}.puml` : `${name}.puml`,
-      Body: diagram,
-      ACL: 'public-read'
+      Body: diagram
     }
 
     try {
