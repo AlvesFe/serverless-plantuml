@@ -2,7 +2,6 @@ const AWS = require('aws-sdk')
 const fs = require('fs')
 const _ = require('lodash')
 const logger = require('./utils/logger')
-const caseConverter = require('./utils/caseConverter')
 const template = require('./templates/template.json')
 const PlantumlService = require('./service/plantuml.service')
 const IS_DEBUG = Boolean(process.env.SLS_DEBUG)
@@ -71,8 +70,8 @@ class PlantUml {
   }
 
   generateResources(service) {
-    const functionNames = Object.keys(service.functions)
-    const resourceNames = Object.keys(service.resources.Resources)
+    const functionNames = Object.keys(service?.functions) || []
+    const resourceNames = Object.keys(service?.resources?.Resources) || []
     const plantUmlService = new PlantumlService(service.serviceName, service.stage, IS_DEBUG)
     const lambdas = functionNames.map((lambda) =>
       plantUmlService.resourceBuilder(service.functions[lambda], lambda, 'function')
@@ -83,24 +82,31 @@ class PlantUml {
     const events = functionNames.map((lambda) => {
       const event = service.functions[lambda]?.events[0]
       const key = Object.keys(event)[0]
-      let eventName = 'http'
-      if (key !== 'http') {
-        eventName = typeof event[key] !== 'string' ?
-          event[key]?.arn['Fn::GetAtt'][0] :
-          event[key]?.split(':').pop().split('-')[0]
+      if (key === 'http')
+        return plantUmlService.resourceBuilder(event, 'http', 'event')
+      if (typeof event[key] === 'string') {
+        const eventName = event[key]?.split(':').pop().split('-')[0]
+        return plantUmlService.resourceBuilder(event, eventName, 'event')
       }
-      return plantUmlService.resourceBuilder(event, eventName, 'event')
     })
-
     const eventRelations = functionNames.map((lambda) => {
       const event = service.functions[lambda]?.events[0]
       const key = Object.keys(event)[0]
-      let eventName = 'http'
-      if (key !== 'http') {
-        eventName = typeof event[key] !== 'string' ?
-          event[key]?.arn['Fn::GetAtt'][0] :
-          event[key]?.split(':').pop().split('-')[0]
+      let eventName = ''
+      if (key === 'http')
+        return plantUmlService.relationBuilder(event, 'http', lambda, 'events')
+      if (typeof event[key] === 'string') {
+        eventName = event[key]?.split(':').pop().split('-')[0]
+        return plantUmlService.relationBuilder(event, eventName, lambda, 'events')
       }
+
+      const resourceName = event[key]?.arn['Fn::GetAtt'][0]
+      const resource = service.resources.Resources[resourceName]
+      const resourceType = plantUmlService.getResourceType(resource, 'resource')
+      const prefix = plantUmlService.getPrefix(resourceType, resourceType)
+      eventName = plantUmlService
+        .getItemLabel(resource, prefix, resourceName)
+        .replace(`-${service.stage}`, '')
       return plantUmlService.relationBuilder(event, eventName, lambda, 'events')
     })
 
