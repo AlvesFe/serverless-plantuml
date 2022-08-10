@@ -27,5 +27,9 @@
     "plantuml-diagram",
     "serverless-plugin",
     "puml"
-  ]
+  ],
+  "dependencies": {
+    "aws-sdk": "^2.1191.0",
+    "lodash": "^4.17.21"
+  }
 }

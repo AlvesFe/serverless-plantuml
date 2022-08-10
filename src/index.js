@@ -1,8 +1,10 @@
 const AWS = require('aws-sdk')
 const fs = require('fs')
+const _ = require('lodash')
 const logger = require('./utils/logger')
-const caseConverter = require('serverless-plantuml/src/utils/caseConverter')
+const caseConverter = require('./utils/caseConverter')
 const template = require('./templates/template.json')
+const PlantumlService = require('./service/plantuml.service')
 const IS_DEBUG = Boolean(process.env.SLS_DEBUG)
 
 class PlantUml {
@@ -69,111 +71,41 @@ class PlantUml {
   }
 
   generateResources(service) {
-    let lambdas, resources, relations
     const functionNames = Object.keys(service.functions)
     const resourceNames = Object.keys(service.resources.Resources)
-
-    try {
-      lambdas = functionNames.reduce((acc, key) => {
-        const camelCaseName = caseConverter(service.serviceName, 'kebab', 'camel')
-          + caseConverter(key, 'camel', 'pascal')
-        const lambda = `Lambda(${camelCaseName}, "${service.serviceName}_${key}", "Lambda function")`
-        return `${acc}${lambda}\n`
-      }, '')
-    } catch (error) {
-      console.log(error);
-      IS_DEBUG && logger(error, 'debug')
-      logger('Could not process lambdas, skipping', 'warning')
-    }
-
-    try {
-      resources = resourceNames.reduce((acc, key) => {
-        const resource = this.resourceTranslator(service.resources.Resources[key], key, service.stage)
-        return resource ? `${acc}${resource}\n` : acc
-      }, '')
-
-      const events = functionNames.reduce((acc, key) => {
-        const event = this.eventTranslator(service.functions[key].events[0])
-        return event ? `${acc}${event}\n` : acc
-      }, '')
-
-      const hasApiGateway = functionNames.some(key => Object.keys(service.functions[key].events[0])[0] === 'http')
-      if (hasApiGateway) {
-        const pascalCaseName = caseConverter(service.serviceName, 'kebab', 'pascal')
-        resources += `APIGateway(${service.stage}${pascalCaseName}, "${service.stage}-${service.serviceName}", "API Gateway")\n`
+    const plantUmlService = new PlantumlService(service.serviceName, service.stage, IS_DEBUG)
+    const lambdas = functionNames.map((lambda) =>
+      plantUmlService.resourceBuilder(service.functions[lambda], lambda, 'function')
+    )
+    const resources = resourceNames.map((resource) =>
+      plantUmlService.resourceBuilder(service.resources.Resources[resource], resource, 'resource')
+    )
+    const events = functionNames.map((lambda) => {
+      const event = service.functions[lambda]?.events[0]
+      const key = Object.keys(event)[0]
+      let eventName = 'http'
+      if (key !== 'http') {
+        eventName = typeof event[key] !== 'string' ?
+          event[key]?.arn['Fn::GetAtt'][0] :
+          event[key]?.split(':').pop().split('-')[0]
       }
-      resources += events
-    } catch (error) {
-      IS_DEBUG && logger(error, 'debug')
-      logger('Could not process resources, skipping', 'warning')
-    }
+      return plantUmlService.resourceBuilder(event, eventName, 'event')
+    })
 
-    try {
-      relations = functionNames.reduce((acc, key) => {
-        const lambda = caseConverter(service.serviceName, 'kebab', 'camel')
-          + caseConverter(key, 'camel', 'pascal')
-        const relation = this.relationTranslator(service.functions[key].events[0], lambda, service)
-        return relation ? `${acc}${relation}\n` : acc
-      }, '')
-    }
-    catch (error) {
-      IS_DEBUG && logger(error, 'debug')
-      logger('Could not process relations, skipping', 'warning')
-    }
+    const eventRelations = functionNames.map((lambda) => {
+      const event = service.functions[lambda]?.events[0]
+      const key = Object.keys(event)[0]
+      let eventName = 'http'
+      if (key !== 'http') {
+        eventName = typeof event[key] !== 'string' ?
+          event[key]?.arn['Fn::GetAtt'][0] :
+          event[key]?.split(':').pop().split('-')[0]
+      }
+      return plantUmlService.relationBuilder(event, eventName, lambda, 'events')
+    })
 
-    return [lambdas, resources, relations].filter(Boolean).join('\n')
-  }
-
-  relationTranslator(event, lambda, service) {
-    if (!event) return null
-    const { serviceName, stage } = service
-    const pascalCaseName = caseConverter(serviceName, 'kebab', 'pascal')
-    const pascalStage = caseConverter(stage, 'camel', 'pascal')
-    switch (Object.keys(event)[0]) {
-      case 'http':
-        return `Rel(${stage}${pascalCaseName}, ${lambda}, "${event.http.method.toUpperCase()} ${event.http.path}", "HTTP")`
-      case 'sqs':
-        const queueName = typeof event.sqs === 'string' ?
-          caseConverter(event.sqs.split(':').pop(), 'kebab', 'camel') :
-          `${event.sqs.arn['Fn::GetAtt'][0]}${pascalStage}`
-        return `Rel(${queueName}, ${lambda}, "Subscriber", "SQS")`
-      default:
-        return null
-    }
-  }
-
-
-  eventTranslator(event) {
-    if (!event) return null
-    switch (Object.keys(event)[0]) {
-      case 'sqs':
-        if (typeof event.sqs !== 'string') return null
-        const queueName = event.sqs.split(':').pop()
-        const camelCaseName = caseConverter(queueName, 'kebab', 'camel')
-        return `SimpleQueueService(${camelCaseName}, "${queueName}", "SQS")`
-      case 'http':
-        return null
-      default:
-        IS_DEBUG && logger(`Event (${Object.keys(event)[0]}) not mapped, skipping`, 'debug')
-        return null
-    }
-  }
-
-  resourceTranslator(resource, key, stage) {
-    const pascalStage = caseConverter(stage, 'camel', 'pascal')
-    const { Type, Properties } = resource
-    const resourceName = key + pascalStage
-    switch (Type) {
-      case 'AWS::DynamoDB::Table':
-        return `DynamoDB(${resourceName}, "${Properties.TableName}", "DynamoDB")`
-      case 'AWS::SNS::Topic':
-        return `SimpleNotificationService(${resourceName}, "${Properties.TopicName}", "SNS")`
-      case 'AWS::SQS::Queue':
-        return `SimpleQueueService(${resourceName}, "${Properties.QueueName}", "SQS")`
-      default:
-        IS_DEBUG && logger(`Resource (${Type}) not mapped, skipping`, 'debug')
-        return null
-    }
+    const items = _.concat(lambdas, resources, events, eventRelations)
+    return _.uniq(items).filter(Boolean).join('\n')
   }
 
   saveDiagram(diagram, options) {
