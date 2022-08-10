@@ -4,6 +4,7 @@ const _ = require('lodash')
 const logger = require('./utils/logger')
 const template = require('./templates/template.json')
 const PlantumlService = require('./service/plantuml.service')
+const caseConverter = require('./utils/caseConverter')
 const IS_DEBUG = Boolean(process.env.SLS_DEBUG)
 
 class PlantUml {
@@ -76,9 +77,16 @@ class PlantUml {
     const lambdas = functionNames.map((lambda) =>
       plantUmlService.resourceBuilder(service.functions[lambda], lambda, 'function')
     )
-    const resources = resourceNames.map((resource) =>
-      plantUmlService.resourceBuilder(service.resources.Resources[resource], resource, 'resource')
-    )
+    const resources = resourceNames.map((resource) => {
+      const _resource = service.resources.Resources[resource]
+      const resourceType = plantUmlService.getResourceType(_resource, 'resource')
+      const prefix = plantUmlService.getPrefix(resourceType, resourceType)
+      const _resourceName = plantUmlService
+        .getItemLabel(_resource, prefix, resource)
+        .replace(`-${service.stage}`, '')
+      const resourceName = caseConverter(_resourceName, 'kebab', 'camel')
+      return plantUmlService.resourceBuilder(_resource, resourceName, 'resource')
+    })
     const events = functionNames.map((lambda) => {
       const event = service.functions[lambda]?.events[0]
       const key = Object.keys(event)[0]
@@ -104,9 +112,10 @@ class PlantUml {
       const resource = service.resources.Resources[resourceName]
       const resourceType = plantUmlService.getResourceType(resource, 'resource')
       const prefix = plantUmlService.getPrefix(resourceType, resourceType)
-      eventName = plantUmlService
+      const _eventName = plantUmlService
         .getItemLabel(resource, prefix, resourceName)
         .replace(`-${service.stage}`, '')
+      eventName = caseConverter(_eventName, 'kebab', 'camel')
       return plantUmlService.relationBuilder(event, eventName, lambda, 'events')
     })
 
