@@ -94,8 +94,10 @@ class PlantUml {
       const key = Object.keys(event)[0]
       if (key === 'http')
         return plantUmlService.resourceBuilder(event, 'http', 'event')
-      if (typeof event[key] === 'string') {
-        const eventName = event[key]?.split(':').pop().split('-')[0]
+      if (typeof event[key] === 'string' || typeof event[key]?.arn === 'string') {
+        const eventName = event[key]?.arn ?
+          event[key]?.arn?.split(':').pop().split('-')[0] :
+          event[key]?.split(':').pop().split('-')[0]
         return plantUmlService.resourceBuilder(event, eventName, 'event')
       }
     })
