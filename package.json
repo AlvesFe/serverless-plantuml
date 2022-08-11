@@ -1,6 +1,6 @@
 {
   "name": "serverless-plantuml",
-  "version": "1.0.1",
+  "version": "1.1.5",
   "description": "Serverless plugin to pregen a PlantUML diagram from the serverless resources",
   "main": "./src/index.js",
   "author": "Felipe Batista Alves <AlvesFe>",
@@ -27,5 +27,9 @@
     "plantuml-diagram",
     "serverless-plugin",
     "puml"
-  ]
+  ],
+  "dependencies": {
+    "aws-sdk": "^2.1191.0",
+    "lodash": "^4.17.21"
+  }
 }

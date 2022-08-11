@@ -1,6 +1,6 @@
 module.exports = function caseConverter(name, from, to) {
   if (from === 'kebab' && to === 'camel') {
-    return name.replace(/-([a-z])/g, g => g[1].toUpperCase()) 
+    return name.replace(/[-_]+(\w)/g, (_match, letter) => letter.toUpperCase())
   }
   if (from === 'camel' && to === 'pascal') {  
     return name.charAt(0).toUpperCase() + name.slice(1)
@@ -11,5 +11,5 @@ module.exports = function caseConverter(name, from, to) {
   if (from === 'kebab' && to === 'pascal') {
     return name.replace(/-([a-z])/g, g => g[1].toUpperCase())
   }
-  return name;
+  return name
 }
