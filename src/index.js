@@ -79,6 +79,7 @@ class PlantUml {
     )
     const resources = resourceNames.map((resource) => {
       const _resource = service.resources.Resources[resource]
+      if (!_resource) return
       const resourceType = plantUmlService.getResourceType(_resource, 'resource')
       const prefix = plantUmlService.getPrefix(resourceType, resourceType)
       const _resourceName = plantUmlService
@@ -89,6 +90,7 @@ class PlantUml {
     })
     const events = functionNames.map((lambda) => {
       const event = service.functions[lambda]?.events[0]
+      if (!event) return
       const key = Object.keys(event)[0]
       if (key === 'http')
         return plantUmlService.resourceBuilder(event, 'http', 'event')
@@ -99,6 +101,7 @@ class PlantUml {
     })
     const eventRelations = functionNames.map((lambda) => {
       const event = service.functions[lambda]?.events[0]
+      if (!event) return
       const key = Object.keys(event)[0]
       let eventName = ''
       if (key === 'http')
