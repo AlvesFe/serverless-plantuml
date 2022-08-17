@@ -95,9 +95,8 @@ class PlantUml {
       if (key === 'http')
         return plantUmlService.resourceBuilder(event, 'http', 'event')
       if (typeof event[key] === 'string' || typeof event[key]?.arn === 'string') {
-        const eventName = event[key]?.arn ?
-          event[key]?.arn?.split(':').pop().split('-')[0] :
-          event[key]?.split(':').pop().split('-')[0]
+        const arn = event[key]?.arn || event[key]
+        const eventName = arn.split(':').pop().split('-')[0]         
         return plantUmlService.resourceBuilder(event, eventName, 'event')
       }
     })
@@ -108,8 +107,9 @@ class PlantUml {
       let eventName = ''
       if (key === 'http')
         return plantUmlService.relationBuilder(event, 'http', lambda, 'events')
-      if (typeof event[key] === 'string') {
-        eventName = event[key]?.split(':').pop().split('-')[0]
+      if (typeof event[key] === 'string' || typeof event[key]?.arn === 'string') {
+        const arn = event[key]?.arn || event[key]
+        eventName = arn.split(':').pop().split('-')[0]
         return plantUmlService.relationBuilder(event, eventName, lambda, 'events')
       }
 
