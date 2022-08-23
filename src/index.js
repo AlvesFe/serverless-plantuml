@@ -71,8 +71,8 @@ class PlantUml {
   }
 
   generateResources(service) {
-    const functionNames = Object.keys(service?.functions) || []
-    const resourceNames = Object.keys(service?.resources?.Resources) || []
+    const functionNames = service?.functions ? Object.keys(service?.functions) : []
+    const resourceNames = service?.resources?.Resources ? Object.keys(service.resources.Resources) : []
     const plantUmlService = new PlantumlService(service.serviceName, service.stage, IS_DEBUG)
     const lambdas = functionNames.map((lambda) =>
       plantUmlService.resourceBuilder(service.functions[lambda], lambda, 'function')
@@ -112,7 +112,7 @@ class PlantUml {
         eventName = arn.split(':').pop().split('-')[0]
         return plantUmlService.relationBuilder(event, eventName, lambda, 'events')
       }
-
+      if(!service?.resources?.Resources) return
       const resourceName = event[key]?.arn['Fn::GetAtt'][0]
       const resource = service.resources.Resources[resourceName]
       const resourceType = plantUmlService.getResourceType(resource, 'resource')
