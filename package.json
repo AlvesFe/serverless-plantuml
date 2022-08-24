@@ -1,6 +1,6 @@
 {
   "name": "serverless-plantuml",
-  "version": "1.1.7",
+  "version": "1.1.9",
   "description": "Serverless plugin to pregen a PlantUML diagram from the serverless resources",
   "main": "./src/index.js",
   "author": "Felipe Batista Alves <AlvesFe>",
@@ -11,7 +11,7 @@
     "url": "https://github.com/AlvesFe/serverless-plantuml"
   },
   "scripts": {
-    "publish": "npm publish"
+    "publishNpm": "npm publish"
   },
   "peerDependencies": {
     "serverless": ">=2.66"
