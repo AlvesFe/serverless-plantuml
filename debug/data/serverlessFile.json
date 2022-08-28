@@ -1,0 +1,172 @@
+{
+  "configurationInput": {
+    "functions": {
+      "helloWorld": {
+        "handler": "handler.helloWorld",
+        "events": [
+          {
+            "http": {
+              "method": "post",
+              "path": "/helloWorld",
+              "cors": true
+            }
+          }
+        ],
+        "name": "serverless-tests-api-staging-helloWorld"
+      },
+      "helloWorld2": {
+        "handler": "handler.helloWorld2",
+        "events": [
+          {
+            "sqs": {
+              "batchSize": 10,
+              "arn": {
+                "Fn::GetAtt": [
+                  "SQSTest",
+                  "Arn"
+                ]
+              }
+            }
+          }
+        ],
+        "name": "serverless-tests-api-staging-helloWorld2"
+      },
+      "helloWorld3": {
+        "handler": "handler.helloWorld3",
+        "events": [
+          {
+            "http": {
+              "method": "post",
+              "path": "/helloWorld3",
+              "cors": true
+            }
+          }
+        ],
+        "name": "serverless-tests-api-staging-helloWorld3"
+      },
+      "helloWorld4": {
+        "handler": "handler.helloWorld4",
+        "events": [],
+        "name": "serverless-tests-api-staging-helloWorld4"
+      },
+      "helloWorld6": {
+        "handler": "handler.helloWorld6",
+        "events": [],
+        "name": "serverless-tests-api-staging-helloWorld6"
+      }
+    },
+    "custom": {
+      "accountId": "685640415211",
+      "stage": "staging",
+      "region": "us-east-1",
+      "tableTest": "tableTest-staging",
+      "SQSTest": "SQSTest-staging",
+      "SQSTest2": "SQS-Test2-staging",
+      "swaggerApi": {
+        "swagger": {
+          "openapi": "3.0.2",
+          "info": {
+            "title": "API Title",
+            "version": "1.0"
+          },
+          "servers": [
+            {
+              "url": "https://api.server.test/v1"
+            }
+          ],
+          "paths": {
+            "/helloWorld": {
+              "post": {
+                "responses": {
+                  "200": {
+                    "description": "OK"
+                  }
+                },
+                "x-attr-serverless": {
+                  "functionName": "helloWorld",
+                  "cors": true
+                }
+              }
+            },
+            "/helloWorld3": {
+              "post": {
+                "responses": {
+                  "200": {
+                    "description": "OK"
+                  }
+                },
+                "x-attr-serverless": {
+                  "functionName": "helloWorld3",
+                  "cors": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "plantUml": {
+        "path": "docs",
+        "name": "tests",
+        "s3Bucket": "a",
+        "s3Path": "b"
+      }
+    },
+    "resources": {
+      "Resources": {
+        "TableTest": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "TableName": "DYNAMOtableTest-staging",
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "id",
+                "AttributeType": "S"
+              },
+              {
+                "AttributeName": "createdAt",
+                "AttributeType": "S"
+              }
+            ],
+            "KeySchema": [
+              {
+                "AttributeName": "id",
+                "KeyType": "HASH"
+              },
+              {
+                "AttributeName": "createdAt",
+                "KeyType": "RANGE"
+              }
+            ],
+            "ProvisionedThroughput": {
+              "ReadCapacityUnits": 1,
+              "WriteCapacityUnits": 1
+            }
+          }
+        },
+        "SQSTest": {
+          "Type": "AWS::SQS::Queue",
+          "Properties": {
+            "QueueName": "SQSTest-staging"
+          }
+        },
+        "SQSTest2": {
+          "Type": "AWS::SQS::Queue",
+          "Properties": {
+            "QueueName": "SQS-Test2-staging"
+          }
+        }
+      }
+    }
+  },
+  "service": {
+    "service": "serverless-tests-api",
+    "provider": {
+      "stage": "staging",
+      "region": "us-east-1",
+      "name": "aws",
+      "runtime": "nodejs14.x",
+      "lambdaHashingVersion": "20201221",
+      "versionFunctions": true
+    }
+  }
+}
