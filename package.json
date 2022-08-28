@@ -17,6 +17,9 @@
     "serverless": ">=2.66"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.184",
+    "@types/node": "^18.7.13",
+    "@types/serverless": "^3.12.8",
     "@typescript-eslint/eslint-plugin": "^5.35.1",
     "@typescript-eslint/typescript-estree": "^5.35.1",
     "eslint": "^8.2.0",
@@ -39,6 +42,7 @@
   ],
   "dependencies": {
     "aws-sdk": "^2.1191.0",
-    "lodash": "^4.17.21"
+    "case": "^1.6.3",
+    "minimist": "^1.2.6"
   }
 }
