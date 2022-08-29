@@ -8,3 +8,5 @@ yarn-error.log
 test-report.xml
 dist
 node_modules
+
+docs/diagram.puml

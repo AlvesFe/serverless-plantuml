@@ -5,7 +5,7 @@ import minimist from 'minimist'
 const argv = minimist(process.argv.slice(2))
 
 const upload = (argv.u || argv.upload) ?? false
-const serverlessFile = fs.readFileSync('./debug/data/serverlessFile.json').toString()
+const serverlessFile = fs.readFileSync('./data/serverlessFile.json').toString()
 const payload = JSON.parse(serverlessFile)
 const puml = new PlantUml(payload)
 
