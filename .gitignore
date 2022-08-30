@@ -6,5 +6,7 @@ coverage
 # log files
 yarn-error.log
 test-report.xml
-.build
+dist
 node_modules
+
+docs/diagram.puml

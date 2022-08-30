@@ -1,22 +1,40 @@
 {
   "env": {
-    "commonjs": true,
-    "es2021": true,
-    "node": true
+    "es6": true
   },
+  "extends": ["standard-with-typescript"],
+
   "parserOptions": {
-    "ecmaVersion": "latest"
+    "project": "./tsconfig.json"
   },
   "rules": {
     "linebreak-style": "off",
-    "semi": [
-      "error",
-      "never"
+    "semi": "off",
+    "@typescript-eslint/prefer-nullish-coalescing": "off",
+    "@typescript-eslint/strict-boolean-expressions": "off",
+    "@typescript-eslint/dot-notation":"off",
+    "unused-imports/no-unused-imports": "error",
+    "unused-imports/no-unused-vars": "warn",
+    "no-multiple-empty-lines": "off",
+    "@typescript-eslint/promise-function-async": "off",
+    "import/first": "off",
+    "@typescript-eslint/member-delimiter-style": [
+      "warn",
+      {
+        "multiline": {
+          "delimiter": "none"
+        },
+        "singleline": {
+          "delimiter": "semi",
+          "requireLast": false
+        }
+      }
     ],
-    "comma-dangle": [
-      "error",
-      "never"
-    ],
-    "no-console": "off"
-  }
+    "eol-last": "off",
+    "@typescript-eslint/restrict-template-expressions": "off",
+    "@typescript-eslint/space-before-function-paren": "off",
+    "@typescript-eslint/indent": ["warn", 2],
+    "@typescript-eslint/return-await": "off"
+  },
+  "plugins": ["prettier", "jest", "unused-imports"]
 }

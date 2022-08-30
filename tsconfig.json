@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "noImplicitAny": false,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "allowSyntheticDefaultImports": true,
+    "sourceMap": true,
+    "allowJs": true,
+    "watch": false,
+    "outDir": "./dist/",
+    "lib": ["es2015", "es7", "dom"],
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "strict":  true,
+    "strictNullChecks": false
+  },
+  "include": ["./src/**/*"],
+  "exclude": ["node_modules", "node_modules/**", "tmp", "dist", ".build"],
+  "excludeTypes": ["types/node"]
+}
