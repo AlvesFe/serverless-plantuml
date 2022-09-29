@@ -152,14 +152,14 @@ class PlantUmlService {
     resourceName: string,
     prefix: plantUmlResource
   ): string {
-    const { stage, serviceName } = this
+    const { serviceName } = this
     const itemNames = {
       Lambda:
         `${serviceName.camelCase}${Case.pascal(resourceName)}`,
-      DynamoDB: `${resourceName}${stage.capitalized}`,
-      SimpleQueueService: `${resourceName}${stage.capitalized}`,
-      SimpleNotificationService: `${resourceName}${stage.capitalized}`,
-      APIGateway: `${stage.lowercased}${serviceName.pascalCase}`
+      DynamoDB: resourceName,
+      SimpleQueueService: resourceName,
+      SimpleNotificationService: resourceName,
+      APIGateway: serviceName.pascalCase
     }
 
     if (!itemNames[prefix]) throw new Error(`Prefix '${prefix}' not mapped`)
@@ -171,13 +171,13 @@ class PlantUmlService {
     prefix: plantUmlResource,
     resourceName: string
   ): string {
-    const { serviceName } = this
+    const { serviceName, stage } = this
 
     const itemLabels = {
-      Lambda: `${serviceName.default}_${resourceName}`,
-      DynamoDB: resource['Properties']?.TableName,
-      SimpleQueueService: resource['Properties']?.QueueName || resourceName,
-      SimpleNotificationService: resource['Properties']?.TopicName || resourceName,
+      Lambda: `${serviceName.default}-STAGE-${resourceName}`,
+      DynamoDB: resource['Properties']?.TableName.replace(stage.lowercased, 'STAGE'),
+      SimpleQueueService: resource['Properties']?.QueueName.replace(stage.lowercased, 'STAGE') || resourceName,
+      SimpleNotificationService: resource['Properties']?.TopicName.replace(stage.lowercased, 'STAGE') || resourceName,
       APIGateway: serviceName.default
     }
 
