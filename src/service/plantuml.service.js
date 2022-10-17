@@ -1,16 +1,17 @@
-const caseConverter = require('../utils/caseConverter')
 const logger = require('../utils/logger')
+const Case = require('case')
 
 class PlantUmlService {
   constructor(serviceName, stage, debug) {
     this.IS_DEBUG = debug
     this.serviceName = {
       default: serviceName,
-      camelCase: caseConverter(serviceName, 'kebab', 'camel')
+      camelCase: Case.camel(serviceName),
+      pascalCase: Case.pascal(serviceName)
     }
     this.stage = {
       default: stage,
-      capitalized: caseConverter(stage, 'camel', 'pascal'),
+      capitalized: Case.capital(stage),
       lowercased: stage.toLowerCase()
     }
   }
@@ -124,14 +125,14 @@ class PlantUmlService {
   }
 
   getItemName(resourceName, prefix) {
-    const { stage, serviceName } = this
+    const { serviceName } = this
     const itemNames = {
       Lambda:
-        `${serviceName.camelCase}${caseConverter(resourceName, 'camel', 'pascal')}`,
-      DynamoDB: `${resourceName}${stage.capitalized}`,
-      SimpleQueueService: `${resourceName}${stage.capitalized}`,
-      SimpleNotificationService: `${resourceName}${stage.capitalized}`,
-      APIGateway: `${stage.lowercased}${serviceName.camelCase}`
+        `${serviceName.camelCase}${Case.pascal(resourceName)}`,
+      DynamoDB: resourceName,
+      SimpleQueueService: resourceName,
+      SimpleNotificationService: resourceName,
+      APIGateway: serviceName.pascalCase
     }
 
     if (!itemNames[prefix]) throw new Error(`Prefix '${prefix}' not mapped`)

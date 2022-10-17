@@ -4,8 +4,8 @@ const _ = require('lodash')
 const logger = require('./utils/logger')
 const template = require('./templates/template.json')
 const PlantumlService = require('./service/plantuml.service')
-const caseConverter = require('./utils/caseConverter')
 const IS_DEBUG = Boolean(process.env.SLS_DEBUG)
+const Case = require('case')
 
 class PlantUml {
   constructor(serverless) {
@@ -93,7 +93,7 @@ class PlantUml {
         const _resourceName = plantUmlService
           .getItemLabel(_resource, prefix, resource)
           .replace(`-${service.stage}`, '')
-        const resourceName = caseConverter(_resourceName, 'kebab', 'camel')
+        const resourceName = Case.camel(_resourceName)
         return plantUmlService.resourceBuilder(_resource, resourceName, 'resource')
       } catch (error) {
         IS_DEBUG && console.error(error, '\n')
@@ -133,7 +133,7 @@ class PlantUml {
         const _eventName = plantUmlService
           .getItemLabel(resource, prefix, resourceName)
           .replace(`-${service.stage}`, '')
-        eventName = caseConverter(_eventName, 'kebab', 'camel')
+        eventName = Case.camel(_eventName)
         return plantUmlService.relationBuilder(event, eventName, lambda, 'events')
       } catch (error) {
         IS_DEBUG && console.error(error, '\n')
